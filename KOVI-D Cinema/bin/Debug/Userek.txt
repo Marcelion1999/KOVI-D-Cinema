@@ -1,0 +1,4 @@
+1;teszt@gmail.com;1234;0630123456789
+2;teszt2;teszt2;034567
+3;teszt3;teszt4;teszt5
+4;teszt;teszt;teszt

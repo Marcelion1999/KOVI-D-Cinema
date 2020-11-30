@@ -1,0 +1,7 @@
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\bin\Debug\KOVI-D Cinema.exe.config
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\bin\Debug\KOVI-D Cinema.exe
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\bin\Debug\KOVI-D Cinema.pdb
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\obj\Debug\KOVI-D Cinema.csprojAssemblyReference.cache
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\obj\Debug\KOVI-D Cinema.csproj.CoreCompileInputs.cache
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\obj\Debug\KOVI-D Cinema.exe
+E:\Programozás\C#\KOVI-D Cinema\KOVI-D Cinema\obj\Debug\KOVI-D Cinema.pdb
