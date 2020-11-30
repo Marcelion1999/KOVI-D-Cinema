@@ -43,8 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dátum.cs" />
+    <Compile Include="Felhasználó.cs" />
+    <Compile Include="Film.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Szék.cs" />
+    <Compile Include="Vetítés.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
