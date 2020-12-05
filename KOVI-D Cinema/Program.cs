@@ -209,12 +209,22 @@ namespace KOVI_D_Cinema
             var query = from user in Userek
                         where email.Equals(user.Email)
                         where jelszó.Equals(user.Jelszó)
-                        select new { user.ID, user.Admin, user.Email, user.Jelszó };
+                        select new { user.ID, user.Admin, user.Email, user.Jelszó, user.User_nev };
 
             if (!query.Any())
             {
-                Console.WriteLine("Nem sikerült bejelentkezni\nNyomj egy gombot a továbblépéshez!");
-                Console.ReadKey();
+                Console.WriteLine("Nem sikerült bejelentkezni\n\t 1) Újra próbál\n\t 2) Vissza a főmenübe");
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        Bejelentkezés();
+                        break;
+                    default:
+                        Console.WriteLine("Nyomj egy gombot a továbblépéshez");
+                        Console.ReadKey();
+                        break;
+                }
+
             }
             else
             {
@@ -236,18 +246,19 @@ namespace KOVI_D_Cinema
                         {
                             Logged_In = true;
                             LOGGED_USER_ID = i.ID;
-                            showMenu = User_Menu();
+                            showMenu = User_Menu(i.User_nev);
                         }
                     }
                 }
             }
         }
 
-        private static bool User_Menu()
+        private static bool User_Menu(string nev)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            PrintHeader("USER MENU");
+            string welcome = "USER MENU - ÜDVÖZLET: " + nev;
+            PrintHeader(welcome);
             Console.WriteLine("Válassz egy menüpontot:");
             Console.WriteLine("\t1) Foglalás / Vásárlás");
             Console.WriteLine("\t2) Vásárlás");
@@ -684,6 +695,9 @@ namespace KOVI_D_Cinema
                     Console.WriteLine("Nem jó");
                 }
             }
+
+            Console.WriteLine("Kész van!");
+            Console.ReadKey();
 
         }
         static int Kártya_csekk(string adatsor)

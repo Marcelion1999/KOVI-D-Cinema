@@ -12,6 +12,7 @@ namespace KOVI_D_Cinema
         private string email;
         private string jelszó;
         private string telefonszám;
+        private string user_nev;
         private bool admin;
 
         public int ID { get => iD; set => iD = value; }
@@ -19,6 +20,7 @@ namespace KOVI_D_Cinema
         public string Jelszó { get => jelszó; set => jelszó = value; }
         public string Telefonszám { get => telefonszám; set => telefonszám = value; }
         public bool Admin { get => admin; set => admin = value; }
+        public string User_nev { get => user_nev; set => user_nev = value; }
 
         public Felhasználó()
         {
@@ -27,6 +29,7 @@ namespace KOVI_D_Cinema
             this.email = "admin";
             this.jelszó = "admin";
             this.telefonszám = "3258";
+            this.user_nev = "admin";
         }
         public Felhasználó(string sor)
         {
@@ -37,6 +40,7 @@ namespace KOVI_D_Cinema
             this.email = adat[1];
             this.jelszó = adat[2];
             this.telefonszám = adat[3];
+            this.user_nev = adat[4];
 
         }
         public Felhasználó(string _email, string _jelszó, string _telefon)
