@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace KOVI_D_Cinema
@@ -476,19 +477,7 @@ namespace KOVI_D_Cinema
                     Listázás();
                     break;
                 default:
-                    bool is_Szám = true;
-                    for (int i = 0; i < választ.Length; i++)
-                    {
-                        if (char.IsNumber(választ, i) == true)
-                        {
-                            is_Szám = true;
-                        }
-                        else
-                        {
-                            is_Szám = false;
-                        }
-                    }
-                    if (is_Szám && Convert.ToInt32(választ) <= last)
+                    if (Check_if_szám(választ) && Convert.ToInt32(választ) <= last)
                     {
                         Foglalás(választ);
                     }
@@ -513,13 +502,43 @@ namespace KOVI_D_Cinema
                         where film.Név.Equals(keresett_film)
                         select new { vetites.ID, film.Név, vetites.Datum.S_date };
             Console.WriteLine("ID: | Név:");
+            List<int> IDk = new List<int>();
             foreach (var i in query)
             {
                 Console.WriteLine(i.ID + ")  | " + i.Név + " : " + i.S_date + " óra");
+                IDk.Add(i.ID);
             }
-            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek: ");
-            Foglalás(Console.ReadLine());
+            Console.Write("\r\n Hogy visszalépj a főmenübe, írd : Exit");
+            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek a foglaláshoz: ");
+            string választ = Console.ReadLine();
+            switch (választ)
+            {
+                case null:
+                    Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                    Console.ReadKey();
+                    Keresés();
+                    break;
+                case "":
+                    Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                    Console.ReadKey();
+                    Listázás();
+                    break;
+                case "Exit": break;
+                default:
+                    if (Check_if_szám(választ) && IDk.Contains(Convert.ToInt32(választ)))
+                    {
+                        Foglalás(választ);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                        Console.ReadKey();
+                        Keresés();
+                    }
+                    break;
+            }
         }
+    
         #endregion
         #region Foglalás
         static void Foglalás(string vetítés_id)
@@ -803,15 +822,18 @@ namespace KOVI_D_Cinema
             string fura_szám_a_hátulján = Adatbe("CVC kód: ",0);
             string  nev = Adatbe("Számlán szereplő név:  ",1);
 
+            Console.WriteLine("Fizetés a következő bankkártyával:\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "| Kártyaszám: {0}\n" +
+                "| Lejárat:    {1}\n" +
+                "| CVC:        {2}\n" +
+                "| Név:        {3}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", számlaszám,lejárat,fura_szám_a_hátulján,nev);
             Console.WriteLine("A bankkártyadataid helyesek!\n");
 
             Console.WriteLine("Kérlek add meg az ellenőrzéshez szükséges adatokat:\n");
             string user_nev = Adatbe("Regisztrációkor megadott név: ",2);
-
-            Console.WriteLine("\n Fizetés? ");
-            Console.ReadKey();
-            Console.WriteLine("Kész van!");
-            Console.ReadKey();
+            Console.WriteLine("Az utalás készen van! A jegye(ke)t elküldtük az e-mail címére.");
 
         }
         static string Adatbe(string szöveg, int kód) {
@@ -855,7 +877,7 @@ namespace KOVI_D_Cinema
                         if (Regex.IsMatch(adatsor, @"^[a-zA-Z]+$") == true) {return 0;}
                         else { Console.WriteLine("Hibás bevitel");  return 1; }
                     case 2: //nev
-                        if (LOGGED_USER_NAME == adatsor) { return 1; }
+                        if (LOGGED_USER_NAME == adatsor) { return 0; }
                         else { Console.WriteLine("Hibás bevitel"); return 1; }
                     default:
                         Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
@@ -872,7 +894,7 @@ namespace KOVI_D_Cinema
 
             File.WriteAllLines(filepath, lines.GetRange(0, lines.Count - 1).ToArray());
         }
-        static void Main(string[] args)
+        public void Futtat() 
         {
             bool showMenu = true;
             Feltölt();
@@ -881,8 +903,12 @@ namespace KOVI_D_Cinema
                 showMenu = MainMenu();
             }
             Olvasó.Close();
-            //Író.Flush();
-            //Író.Close();
+        }
+        static void Main(string[] args)
+        {
+
+            Program Application = new Program();
+            Application.Futtat();
             Environment.Exit(0);
         }
     }
