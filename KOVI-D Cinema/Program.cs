@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KOVI_D_Cinema
@@ -16,7 +17,7 @@ namespace KOVI_D_Cinema
         public enum User_Státusz { Admin, Regisztrált_Látogató, Nem_Regisztrált }
         public enum Jegy_Státusz { Jegy_Állapot }
 
-        static int ÁR = 1000;
+        static double ÁR = 1000;
         static StreamReader Olvasó;
         static StreamWriter Író;
 
@@ -26,6 +27,7 @@ namespace KOVI_D_Cinema
 
         static bool Logged_In = false;
         static int LOGGED_USER_ID;
+        static string LOGGED_USER_NAME;
 
 
         #region Kinézet
@@ -170,8 +172,8 @@ namespace KOVI_D_Cinema
             Console.WriteLine("\t1) Bejelentkezés");
             // felvitel
             Console.WriteLine("\t2) Regisztráció");
-            Console.WriteLine("\t3) Keresés");
-            Console.WriteLine("\t4) Listázás");
+            Console.WriteLine("\t3) Vetítés Keresés Film Alapján");
+            Console.WriteLine("\t4) Összes Vetítés Listázása");
             Console.WriteLine("\t5) Kilépés");
             Console.Write("\r\nKérlek válassz: ");
 
@@ -246,32 +248,34 @@ namespace KOVI_D_Cinema
                         {
                             Logged_In = true;
                             LOGGED_USER_ID = i.ID;
-                            showMenu = User_Menu(i.User_nev);
+                            LOGGED_USER_NAME = i.User_nev;
+                            showMenu = User_Menu();
                         }
                     }
                 }
             }
         }
 
-        private static bool User_Menu(string nev)
+        private static bool User_Menu()
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            string welcome = "USER MENU - ÜDVÖZLET: " + nev;
+            string welcome = "USER MENU - ÜDVÖZLET: " + LOGGED_USER_NAME;
             PrintHeader(welcome);
+            Console.WriteLine("Foglalni / vásárolni a vetítés kiválasztása után tudsz.");
             Console.WriteLine("Válassz egy menüpontot:");
-            Console.WriteLine("\t1) Foglalás / Vásárlás");
-            Console.WriteLine("\t2) Vásárlás");
+            Console.WriteLine("\t1) Vetítés Keresés Film Alapján");
+            Console.WriteLine("\t2) Összes Vetítés Listázása");
             Console.WriteLine("\t3) Kijelentkezés");
             Console.Write("\r\nKérlek válassz: ");
 
             switch (Console.ReadLine())
             {
                 case "1":
-                    Listázás();
+                    Keresés();
                     break;
                 case "2":
-                    //Vásárlás(db);
+                    Listázás();
                     break;
                 case "3":
                     Console.ForegroundColor = ConsoleColor.Gray;
@@ -382,16 +386,51 @@ namespace KOVI_D_Cinema
         {
             Console.Clear();
             PrintHeader("KOVI-D MOZI - REGISZTRÁCIÓ");
-            Console.Write("Kérlek add meg az e-mail címedet: ");
-            string email = Console.ReadLine();
-            Console.Write("Kérlek add meg a jelszót a fiókodhoz: ");
-            string jelszó = Console.ReadLine();
-            Console.Write("Kérlek add meg a telefonszámod: ");
-            string telefon = Console.ReadLine();
+            string email = "", jelszó = "", telefon = "", nev = ""; int a = 0;
+            do
+            {
+                if (a == 1)
+                {
+                    Console.WriteLine("Hibás bevitel: Próbáld újra");
+                }
+                Console.Write("Kérlek add meg az e-mail címedet: ");
+                email = Console.ReadLine(); a++;
+            } while (string.IsNullOrEmpty(email));
+            a = 0;
+            do
+            {
+                if (a == 1)
+                {
+                    Console.WriteLine("Hibás bevitel: Próbáld újra");
+                }
+                Console.Write("Kérlek add meg a jelszót a fiókodhoz: ");
+                jelszó = Console.ReadLine(); a++;
+            } while (string.IsNullOrEmpty(jelszó));
+            a = 0;
+            do
+            {
+                if (a == 1)
+                {
+                    Console.WriteLine("Hibás bevitel: Próbáld újra");
+                }
+                Console.Write("Kérlek add meg a telefonszámod: ");
+                telefon = Console.ReadLine(); a++;
+            } while (string.IsNullOrEmpty(telefon));
+
+            do
+            {
+                if (a == 1)
+                {
+                    Console.WriteLine("Hibás bevitel: Próbáld újra");
+                }
+                Console.Write("Kérlek add meg a teljes neved: ");
+                nev = Console.ReadLine(); a++;
+            } while (string.IsNullOrEmpty(nev));
+
             Író = new StreamWriter("Userek.txt", true);
             try
             {
-                Író.WriteLine("{0};{1};{2};{3}", User_Last_ID + 1, email, jelszó, telefon);
+                Író.WriteLine("{0};{1};{2};{3};{4}", User_Last_ID + 1, email, jelszó, telefon, nev);
                 User_Last_ID++;
             }
             catch (Exception e)
@@ -400,7 +439,7 @@ namespace KOVI_D_Cinema
                 Console.WriteLine("Nem sikerült a regisztráció");
                 Console.WriteLine("Hiba: {0}", e); throw;
             }
-            Console.WriteLine("Sikerült a regisztráció");
+            Console.WriteLine("Sikerült a regisztráció, köszönjuk : {0}", nev);
             Író.Flush();
             Író.Close();
             User_Betölt(); // újratölti,hogy benne legyen az újonnan felvitt
@@ -415,30 +454,70 @@ namespace KOVI_D_Cinema
                         join film in Filmek
                         on vetites.Film_ID equals film.Film_ID
                         select new { vetites.ID, film.Név, vetites.Datum.S_date };
-
+            Console.WriteLine("ID: | Név:");
+            int last = 0;
             foreach (var i in query)
             {
-                Console.WriteLine(i.ID + ") " + i.Név + " : " + i.S_date + " óra");
+                Console.WriteLine(i.ID + ")  | " + i.Név + " : " + i.S_date + " óra");
+                last++;
             }
-            Console.Write("\r\nKérlek válassz: ");
-            Foglalás(Console.ReadLine());
+            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek: ");
+            string választ = Console.ReadLine();
+            switch (választ)
+            {
+                case null:
+                    Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                    Console.ReadKey();
+                    Listázás();
+                break;
+                case "":
+                    Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                    Console.ReadKey();
+                    Listázás();
+                    break;
+                default:
+                    bool is_Szám = true;
+                    for (int i = 0; i < választ.Length; i++)
+                    {
+                        if (char.IsNumber(választ, i) == true)
+                        {
+                            is_Szám = true;
+                        }
+                        else
+                        {
+                            is_Szám = false;
+                        }
+                    }
+                    if (is_Szám && Convert.ToInt32(választ) <= last)
+                    {
+                        Foglalás(választ);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                        Console.ReadKey();
+                        Listázás();
+                    }
+                    break;
+            }
         }
         static void Keresés()
         {
             Console.Clear();
             PrintHeader("KOVI-D MOZI - VETÍTÉS KERESÉS");
-            Console.Write("Mit keresel ?: ");
+            Console.Write("Írd be a film címét, amit keresel ?: ");
             string keresett_film = Console.ReadLine();
             var query = from vetites in Vetítések
                         join film in Filmek
                         on vetites.Film_ID equals film.Film_ID
                         where film.Név.Equals(keresett_film)
                         select new { vetites.ID, film.Név, vetites.Datum.S_date };
+            Console.WriteLine("ID: | Név:");
             foreach (var i in query)
             {
-                Console.WriteLine(i.ID + ") " + i.Név + " : " + i.S_date + " óra");
+                Console.WriteLine(i.ID + ")  | " + i.Név + " : " + i.S_date + " óra");
             }
-            Console.Write("\r\nKérlek válassz: ");
+            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek: ");
             Foglalás(Console.ReadLine());
         }
         #endregion
@@ -486,56 +565,70 @@ namespace KOVI_D_Cinema
                 Film_Név = item.Név;
                 Vetítés_Dátum = item.S_date;
                 Vetítés_ID = item.ID;
-                Console.WriteLine("Foglalás a következőre: " + Film_Név + " \n\tekkor: " + Vetítés_Dátum + " órakor");
+                Console.WriteLine("Foglalás a következőre:\n\t" + Film_Név + " \n\tekkor: " + Vetítés_Dátum + " órakor");
                 int[,] Foglalt = FoglaltSzékek(Vetítés_ID); //foglalt
                 Táblázat_Rajz();
                 Székrajz(Foglalt);
                 Console.Write("\nHány jegyet szeretnél venni/foglalni?: ");
                 int db = Convert.ToInt32(Console.ReadLine());
-                Író = new StreamWriter("Székek.txt", true);
-                int sor = 0;
-                int oszlop = 0;
-                for (int i = 0; i < db; i++)
+                if (db == 0 || db > 100)
                 {
-                    Console.Write("Az {0}. jegy hova szóljon?: \nSor:", i + 1);
-                    sor = Convert.ToInt32(Console.ReadLine());
-                    Console.Write("Oszlop:");
-                    oszlop = Convert.ToInt32(Console.ReadLine());
-                    if (Keres(Foglalt, sor, oszlop) == true)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Ez a hely már foglalt! \nKérlek válassz másikat");
-                        i--;
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            Író.WriteLine("{0};{1};{2}", Vetítés_ID, sor, oszlop);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Nem sikerült a felvétel");
-                            Console.WriteLine("Hiba: {0}", e); throw;
-                        }
-                    }
-
+                    Console.WriteLine("Befejezted a székválasztást. Nyomj egy gombot a továbblépéshez");
                 }
-                Console.WriteLine("Sikeresen foglaltál!\nNyomj meg egy gombot, hogy továbblépj");
-                Console.ReadKey();
-                Író.Flush();
-                Író.Close();
-                Szék_Betölt(); // újra betölt,hogy legyenek benne az adatok
-                Foglalás_Menu(db);
-                
-                //Console.WriteLine("A jegyeid ára: {0}", db * ÁR);
-                Console.WriteLine("Nyomj meg egy gombot, hogy továbblépj");
+                else
+                {
+                    Író = new StreamWriter("Székek.txt", true);
+                    int sor = 0;
+                    int oszlop = 0;
+                    for (int i = 0; i < db; i++)
+                    {
+                        Console.Write("Az {0}. jegy hova szóljon?: \nSor:", i + 1);
+                        sor = Convert.ToInt32(Console.ReadLine());
+                        Console.Write("Oszlop:");
+                        oszlop = Convert.ToInt32(Console.ReadLine());
+                        if (Keres(Foglalt, sor, oszlop) == true)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Ez a hely már foglalt! Vagy nem tudsz ide foglalni \nKérlek válassz másikat");
+                            i--;
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                Író.WriteLine("{0};{1};{2}", Vetítés_ID, sor, oszlop);
+                                Foglalt[sor-1, oszlop-1] = 1;
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Nem sikerült a felvétel");
+                                Console.WriteLine("Hiba: {0}", e); throw;
+                            }
+                        }
+                       
+                    }
+                    Console.WriteLine("Sikeresen foglaltál!\nNyomj meg egy gombot, hogy továbblépj");
+                    Console.ReadKey();
+                    Író.Flush();
+                    Író.Close();
+                    Szék_Betölt(); // újra betölt,hogy legyenek benne az adatok
+                    Foglalás_Menu(db);
+
+                    //Console.WriteLine("A jegyeid ára: {0}", db * ÁR);
+                    Console.WriteLine("Nyomj meg egy gombot, hogy továbblépj");
+                }
+               
+               
             }
             Console.ReadKey();
         }
         static bool Keres(int[,] matrix, int sor, int oszlop)
         {
+            if (sor > 8 || oszlop > 8)
+            {
+                return true;
+            }
             for (int x = 0; x < matrix.GetLength(0); x++)
             {
                 for (int y = 0; y < matrix.GetLength(1); y++) //
@@ -563,22 +656,21 @@ namespace KOVI_D_Cinema
             Console.Clear();
             PrintHeader("KOVI-D MOZI - FOGLALÁS / VÁSÁRLÁS");
             Console.WriteLine("Válassz egy menüpontot:");
-            Console.WriteLine("1) Folytatás csak foglalással, helyszínen vásárol");
-            Console.WriteLine("2) Folytatás vásárlással: ");
-            Console.WriteLine("3) Foglalás törlése");
+            Console.WriteLine("1) Helyszínen vásárolok! Foglalás véglegesítése");
+            Console.WriteLine("2) Most vásárolok");
+            Console.WriteLine("3) Foglalás törlése / Vissza a főmenübe");
             Console.Write("\r\nKérlek válassz: ");
 
             switch (Console.ReadLine())
             {
                 case "1":
-                    Console.WriteLine("A jegyeid ára: {0}", db * ÁR);
+                    Console.WriteLine("A jegyeid ára: {0}\nKöszönjök a foglalást! A helyszínen várunk!", db * ÁR); //return false; // nincs több dolga, lefoglalta ajegyeket
                     break;
-                //return false; // nincs több dolga, lefoglalta ajegyeket
                 case "2":
                     Vásárlás(db);
                     break;
                 case "3":
-                    Foglalás_Törlés();
+                    Foglalás_Törlés("Vetítések.txt"); //TODO
                     break;
                 default:
                     break;
@@ -637,99 +729,149 @@ namespace KOVI_D_Cinema
             }
         }
         #endregion
+        static int Kupon_felvitel()
+        {
+            Console.WriteLine("TESZT kupon: SWT-gyakorlat");
+            Console.WriteLine("Kilépéshez írd: exit");
+            Console.Write("Add meg a kuponod:");
+            switch (Console.ReadLine())
+            {
+                case "SWT-gyakorlat":
+                    Console.WriteLine("\n20% kedvezményre jogosító kupont adtál meg");
+                    ÁR = ÁR * 0.8;
+                    return 1;
+                case "I_AM_THE_MESSIAH":
+                    Console.WriteLine("\n100% kedvezményre jogosító kupont adtál meg");
+                    ÁR = 0;
+                    return 1;
+                case "Exit": return 0;
+                case "exit": return 0;
+                case "EXIT": return 0;
+                case "0": return 0;
+                default:
+                    Console.WriteLine("\nNem érvényes kupont adtál meg");
+                    Console.WriteLine("Nyomj bármilyen gombot a továbblépéshez !");
+                    Console.ReadKey();
+                    return 1;
+            }
+        }
+        static void Kupon() 
+        {
+            Console.WriteLine("Kérlek válaszd ki a kedvezményeid: ");
+            Console.WriteLine("\t1) Kuponkód felvitele: ");
+            Console.WriteLine("\t2) Nincs kuponkódom");
+            Console.Write("\r\nKérlek válassz: ");
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    int ciklus_változó = 1;
+                    while (ciklus_változó == 1)
+                    {
+                        ciklus_változó = Kupon_felvitel();
+                    }
+                    break;
+                case "2":
+                    Console.WriteLine("Nyomj bármilyen gombot a továbblépéshez !");
+                    Console.ReadKey();
+                    break;
+                default: 
+                    Console.WriteLine("Hibás bevitel");
+                    Console.WriteLine("Nyomj bármilyen gombot a továbblépéshez !");
+                    Console.ReadKey();
+                    break;
+            }
+        }
+       
         static void Vásárlás(int db)
         {
+            Console.Clear();
             PrintHeader("KOVI-D MOZI - VÁSÁRLÁS");
-            Console.WriteLine("Az általad fizetendő összeg: {0}", db*ÁR);
-            Console.WriteLine("Kérlek add meg a bankkártya adataid:");
-            string számlaszám, lejárat, fura_szám_a_hátulján, nev;
-            int fiszfasz = 1;
-            while (fiszfasz == 1)
-            {
-                Console.Write("Kártyaszám: "); számlaszám = Console.ReadLine();
-                fiszfasz = Kártya_csekk(számlaszám);
-                if (fiszfasz == 1)
-                {
-                    Console.WriteLine(" Nem jó");
-                }
-            }
-            fiszfasz = 1;
-            while (fiszfasz == 1)
-            {
-                Console.Write("Lejárati dátum: "); lejárat = Console.ReadLine();
-                fiszfasz = Kártya_csekk(lejárat);
-                if (fiszfasz == 1)
-                {
-                    Console.WriteLine(" Nem jó");
-                }
-            }
-             fiszfasz = 1;
-            while (fiszfasz == 1)
-            {
-                Console.Write("CVC kód: "); fura_szám_a_hátulján = Console.ReadLine();
-                fiszfasz = Kártya_csekk(fura_szám_a_hátulján);
-                if (fiszfasz == 1)
-                {
-                    Console.WriteLine(" Nem jó");
-                }
-            }
-            fiszfasz = 1;
-            while (fiszfasz == 1)
-            {
-                Console.Write("Név: "); nev = Console.ReadLine();
-                fiszfasz = Kártya_csekk(nev);
-                if (fiszfasz == 1)
-                {
-                    Console.WriteLine(" Nem jó");
-                }
-            }
-            Console.WriteLine("A bankkártyadataid helyesek!");
-            Console.WriteLine("Kérlek add meg az ellenőrzéshez szükséges adatokat:");
-            string User_email;
-            while (fiszfasz == 1)
-            {
-                Console.Write("E-mail címed: "); User_email = Console.ReadLine();
-                fiszfasz = User_csekk(User_email);
-                if (fiszfasz == 1)
-                {
-                    Console.WriteLine("Nem jó");
-                }
-            }
+            Console.WriteLine("Az általad fizetendő összeg: {0}", db * ÁR);
+            Console.WriteLine("Diák / Nyugdíjas kedvezményre jogosult vagy ? ");
+            Console.WriteLine("\t1) Igen");
+            Console.WriteLine("\t2) Nem ");
+            Console.Write("\r\nKérlek válassz: ");
+            if (Console.ReadLine() == "1") { ÁR = 750; }
+            else{  ÁR = 1000;}
+            Console.WriteLine("Az általad fizetendő összeg mostmár: {0}", db * ÁR);
+            Kupon();
+            Console.WriteLine("Az általad fizetendő összeg mostmár: {0}\n", db * ÁR);
 
+            Console.WriteLine("Kérlek add meg a bankkártya adataid:\n");
+            string számlaszám = Adatbe("Számlaszám: ",0);
+            string lejárat = Adatbe("Lejárati-dátum: ",0);
+            string fura_szám_a_hátulján = Adatbe("CVC kód: ",0);
+            string  nev = Adatbe("Számlán szereplő név:  ",1);
+
+            Console.WriteLine("A bankkártyadataid helyesek!\n");
+
+            Console.WriteLine("Kérlek add meg az ellenőrzéshez szükséges adatokat:\n");
+            string user_nev = Adatbe("Regisztrációkor megadott név: ",2);
+
+            Console.WriteLine("\n Fizetés? ");
+            Console.ReadKey();
             Console.WriteLine("Kész van!");
             Console.ReadKey();
 
         }
-        static int Kártya_csekk(string adatsor)
-        {
-            try
+        static string Adatbe(string szöveg, int kód) {
+            int fiszfasz = 1; string adat = "";
+            while (fiszfasz == 1)
             {
-                int adat = Convert.ToInt32(adatsor);
-                return 0;
+                Console.Write(szöveg); 
+                adat = Console.ReadLine();
+                fiszfasz = Adat_csekk(adat, kód);
             }
-            catch (Exception)
-            {
-                return 1;
-            }
-            return 0;
+            return adat;
         }
-        static int User_csekk(string adatsor)
+        static bool Check_if_szám(string adatsor)
         {
-            try
+            for (int i = 0; i < adatsor.Length; i++)
             {
-                if (adatsor == Userek[LOGGED_USER_ID].Email)
+                if (char.IsNumber(adatsor, i) == false)
                 {
-                    return 0;
+                    return false;
                 }
             }
-            catch (Exception)
+            return true;
+        }
+
+        private static int Adat_csekk(string adatsor, int switch_válasz)
+        {
+            if (adatsor == null || adatsor == "")
             {
+                Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                Console.ReadKey();
                 return 1;
             }
-            return 0;
-
+            else 
+            {
+                switch (switch_válasz) // ha return / 0 akkor jó
+                {
+                    case 0: // számlaszám, lejárati dáum, cvc kód
+                        if (Check_if_szám(adatsor) == true) { return 0; }
+                        else { Console.WriteLine("Hibás bevitel"); return 1;}
+                    case 1: //nev
+                        if (Regex.IsMatch(adatsor, @"^[a-zA-Z]+$") == true) {return 0;}
+                        else { Console.WriteLine("Hibás bevitel");  return 1; }
+                    case 2: //nev
+                        if (LOGGED_USER_NAME == adatsor) { return 1; }
+                        else { Console.WriteLine("Hibás bevitel"); return 1; }
+                    default:
+                        Console.WriteLine("Hibás bevitel! Nyomj egy gombot a továbblépéshez");
+                        Console.ReadKey();
+                        return 1;
+                }
+            }
+            
         }
-        static void Foglalás_Törlés() { }
+       
+        static void Foglalás_Törlés(string filepath)
+        {
+            List<string> lines = File.ReadAllLines(filepath).ToList();
+
+            File.WriteAllLines(filepath, lines.GetRange(0, lines.Count - 1).ToArray());
+        }
         static void Main(string[] args)
         {
             bool showMenu = true;

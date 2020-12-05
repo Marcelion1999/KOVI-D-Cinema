@@ -1,4 +1,5 @@
 1;teszt@gmail.com;1234;0630123456789;Kiss Istvan
 2;teszt2;teszt2;034567;Kiss Pista
 3;teszt3;teszt4;teszt5;Teszt Elek
-4;teszt;teszt;teszt;Teszt János
+4;teszt;teszt;teszt;Teszt
+5;test@test.hu;test;06testphone30;József Sztálin
