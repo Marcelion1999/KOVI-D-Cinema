@@ -11,7 +11,6 @@ namespace KOVI_D_Cinema
         private int vetítés_ID;
         private int sor;
         private int oszlop;
-        private char típus;
         public Szék(string sor)
         {
             string[] adat = sor.Split(';');
@@ -23,6 +22,5 @@ namespace KOVI_D_Cinema
         public int Vetítés_ID { get => vetítés_ID; set => vetítés_ID = value; }
         public int Sor { get => sor; set => sor = value; }
         public int Oszlop { get => oszlop; set => oszlop = value; }
-        public char Típus { get => típus; set => típus = value; }
     }
 }

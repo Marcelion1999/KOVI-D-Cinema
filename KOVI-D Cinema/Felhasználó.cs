@@ -28,8 +28,8 @@ namespace KOVI_D_Cinema
             this.iD = 0;
             this.email = "admin";
             this.jelszó = "admin";
-            this.telefonszám = "3258";
             this.user_nev = "admin";
+            this.telefonszám = "3258";
         }
         public Felhasználó(string sor)
         {

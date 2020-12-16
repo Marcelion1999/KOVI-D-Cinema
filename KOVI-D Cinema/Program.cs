@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KOVI_D_Cinema
 {
@@ -462,7 +459,8 @@ namespace KOVI_D_Cinema
                 Console.WriteLine(i.ID + ")  | " + i.Név + " : " + i.S_date + " óra");
                 last++;
             }
-            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek: ");
+            Console.Write("\r\nHogy visszalépj a főmenübe, írd : Exit");
+            Console.Write("\r\nKérlek válaszd ki az ID-jét a vetítésnek a foglaláshoz: ");
             string választ = Console.ReadLine();
             switch (választ)
             {
@@ -476,6 +474,7 @@ namespace KOVI_D_Cinema
                     Console.ReadKey();
                     Listázás();
                     break;
+                case "Exit": break;
                 default:
                     if (Check_if_szám(választ) && Convert.ToInt32(választ) <= last)
                     {
@@ -590,7 +589,7 @@ namespace KOVI_D_Cinema
                 Székrajz(Foglalt);
                 Console.Write("\nHány jegyet szeretnél venni/foglalni?: ");
                 int db = Convert.ToInt32(Console.ReadLine());
-                if (db == 0 || db > 100)
+                if (db == 0 || db > 10)
                 {
                     Console.WriteLine("Befejezted a székválasztást. Nyomj egy gombot a továbblépéshez");
                 }
@@ -689,7 +688,7 @@ namespace KOVI_D_Cinema
                     Vásárlás(db);
                     break;
                 case "3":
-                    Foglalás_Törlés("Vetítések.txt"); //TODO
+                    Foglalás_Törlés("Vetítések.txt",db); //TODO
                     break;
                 default:
                     break;
@@ -758,11 +757,11 @@ namespace KOVI_D_Cinema
                 case "SWT-gyakorlat":
                     Console.WriteLine("\n20% kedvezményre jogosító kupont adtál meg");
                     ÁR = ÁR * 0.8;
-                    return 1;
+                    return 0;
                 case "I_AM_THE_MESSIAH":
                     Console.WriteLine("\n100% kedvezményre jogosító kupont adtál meg");
                     ÁR = 0;
-                    return 1;
+                    return 0;
                 case "Exit": return 0;
                 case "exit": return 0;
                 case "EXIT": return 0;
@@ -820,15 +819,13 @@ namespace KOVI_D_Cinema
             string számlaszám = Adatbe("Számlaszám: ",0);
             string lejárat = Adatbe("Lejárati-dátum: ",0);
             string fura_szám_a_hátulján = Adatbe("CVC kód: ",0);
-            string  nev = Adatbe("Számlán szereplő név:  ",1);
 
             Console.WriteLine("Fizetés a következő bankkártyával:\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "| Kártyaszám: {0}\n" +
                 "| Lejárat:    {1}\n" +
                 "| CVC:        {2}\n" +
-                "| Név:        {3}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", számlaszám,lejárat,fura_szám_a_hátulján,nev);
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", számlaszám,lejárat,fura_szám_a_hátulján);
             Console.WriteLine("A bankkártyadataid helyesek!\n");
 
             Console.WriteLine("Kérlek add meg az ellenőrzéshez szükséges adatokat:\n");
@@ -888,11 +885,11 @@ namespace KOVI_D_Cinema
             
         }
        
-        static void Foglalás_Törlés(string filepath)
+        static void Foglalás_Törlés(string filepath,int db)
         {
             List<string> lines = File.ReadAllLines(filepath).ToList();
 
-            File.WriteAllLines(filepath, lines.GetRange(0, lines.Count - 1).ToArray());
+            File.WriteAllLines(filepath, lines.GetRange(0, lines.Count - db).ToArray());
         }
         public void Futtat() 
         {
