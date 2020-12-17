@@ -834,12 +834,12 @@ namespace KOVI_D_Cinema
 
         }
         static string Adatbe(string szöveg, int kód) {
-            int fiszfasz = 1; string adat = "";
-            while (fiszfasz == 1)
+            int VÁLTOZÓ = 1; string adat = "";
+            while (VÁLTOZÓ == 1)
             {
                 Console.Write(szöveg); 
                 adat = Console.ReadLine();
-                fiszfasz = Adat_csekk(adat, kód);
+                VÁLTOZÓ = Adat_csekk(adat, kód);
             }
             return adat;
         }
